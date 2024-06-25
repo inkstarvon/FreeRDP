@@ -28,11 +28,9 @@
 #include <freerdp/primitives.h>
 
 #include "prim_internal.h"
+#include "prim_YUV.h"
 
-#if !defined(WITH_NEON)
-#error "This file must only be included if WITH_NEON is active!"
-#endif
-
+#if defined(WITH_NEON)
 #include <arm_neon.h>
 
 static primitives_t* generic = NULL;
@@ -742,16 +740,23 @@ static pstatus_t neon_YUV420CombineToYUV444(avc444_frame_type type,
 			return -1;
 	}
 }
+#endif
 
-void primitives_init_YUV_opt(primitives_t* prims)
+void primitives_init_YUV_neon(primitives_t* prims)
 {
+#if defined(WITH_NEON)
 	generic = primitives_get_generic();
 	primitives_init_YUV(prims);
 
 	if (IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE))
 	{
+		WLog_VRB(PRIM_TAG, "NEON optimizations");
 		prims->YUV420ToRGB_8u_P3AC4R = neon_YUV420ToRGB_8u_P3AC4R;
 		prims->YUV444ToRGB_8u_P3AC4R = neon_YUV444ToRGB_8u_P3AC4R;
 		prims->YUV420CombineToYUV444 = neon_YUV420CombineToYUV444;
 	}
+#else
+	WLog_VRB(PRIM_TAG, "undefined WITH_NEON");
+	WINPR_UNUSED(prims);
+#endif
 }

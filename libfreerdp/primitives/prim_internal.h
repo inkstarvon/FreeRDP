@@ -22,6 +22,9 @@
 #include <freerdp/primitives.h>
 #include <freerdp/api.h>
 
+#include <freerdp/log.h>
+#define PRIM_TAG FREERDP_TAG("primitives")
+
 #ifdef __GNUC__
 #define PRIM_ALIGN_128 __attribute__((aligned(16)))
 #else
@@ -275,7 +278,6 @@ FREERDP_LOCAL void primitives_init_colors(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_YCoCg(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_YUV(primitives_t* prims);
 
-#if defined(WITH_SSE2) || defined(WITH_NEON)
 FREERDP_LOCAL void primitives_init_copy_opt(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_set_opt(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_add_opt(primitives_t* prims);
@@ -286,7 +288,6 @@ FREERDP_LOCAL void primitives_init_alphaComp_opt(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_colors_opt(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_YCoCg_opt(primitives_t* prims);
 FREERDP_LOCAL void primitives_init_YUV_opt(primitives_t* prims);
-#endif
 
 #if defined(WITH_OPENCL)
 FREERDP_LOCAL BOOL primitives_init_opencl(primitives_t* prims);

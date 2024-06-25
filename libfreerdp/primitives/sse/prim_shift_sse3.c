@@ -19,6 +19,8 @@
 #include <freerdp/primitives.h>
 #include <winpr/sysinfo.h>
 
+#include "prim_shift.h"
+
 #ifdef WITH_SSE2
 #include <emmintrin.h>
 #include <pmmintrin.h>
@@ -27,9 +29,9 @@
 #include "prim_internal.h"
 #include "prim_templates.h"
 
+#ifdef WITH_SSE2
 static primitives_t* generic = NULL;
 
-#ifdef WITH_SSE2
 /* ------------------------------------------------------------------------- */
 SSE3_SCD_ROUTINE(sse2_lShiftC_16s, INT16, generic->lShiftC_16s, _mm_slli_epi16,
                  *dptr++ = (INT16)((UINT16)*sptr++ << val))
@@ -142,15 +144,16 @@ static pstatus_t sse2_lShiftC_16s_inplace(INT16* WINPR_RESTRICT pSrcDst, UINT32 
  */
 
 /* ------------------------------------------------------------------------- */
-void primitives_init_shift_opt(primitives_t* WINPR_RESTRICT prims)
+void primitives_init_shift_sse3(primitives_t* WINPR_RESTRICT prims)
 {
+#if defined(WITH_SSE2)
 	generic = primitives_get_generic();
 	primitives_init_shift(prims);
-#if defined(WITH_SSE2)
 
 	if (IsProcessorFeaturePresent(PF_SSE2_INSTRUCTIONS_AVAILABLE) &&
 	    IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE))
 	{
+		WLog_VRB(PRIM_TAG, "SSE2/SSE3 optimizations");
 		prims->lShiftC_16s_inplace = sse2_lShiftC_16s_inplace;
 		prims->lShiftC_16s = sse2_lShiftC_16s;
 		prims->rShiftC_16s = sse2_rShiftC_16s;
@@ -158,5 +161,8 @@ void primitives_init_shift_opt(primitives_t* WINPR_RESTRICT prims)
 		prims->rShiftC_16u = sse2_rShiftC_16u;
 	}
 
+#else
+	WLog_VRB(PRIM_TAG, "undefined WITH_SSE2");
+	WINPR_UNUSED(prims);
 #endif
 }
